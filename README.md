@@ -1,7 +1,7 @@
-# Projeto-Ang-ncia-Bancaria-em-java
+# Projeto-Angencia-Bancaria-em-java
 Praticando com java orientado ao objeto, fiz um projeto de agencia bancaria para melhorar mais ainda minhas praticas com java
 
-Descrição do Projeto
+##Descrição do Projeto
 
 
 Este projeto é uma aplicação bancária simples escrita em Java que permite que o usuário crie contas bancárias e realize transações de depósito e saque. Ele foi desenvolvido usando a IDE Eclipse e utiliza conceitos básicos de orientação a objetos, como herança e encapsulamento.
