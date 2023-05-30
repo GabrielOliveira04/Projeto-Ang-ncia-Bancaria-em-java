@@ -2,8 +2,10 @@
 ## Esse projeto foi destinada a disciplina de linguagem de programação e o Projeto integrador parte 1 do projeto
 ### Os seguintes alunos participaram desse projeto:
   Gabriel de Oliveira Pontes
-  Matheus L S Maul de Andrade
-  Pablo Cristian Ferreira de Lima
+ 
+ Matheus L S Maul de Andrade
+ 
+ Pablo Cristian Ferreira de Lima
 
 # Descrição do Projeto
 
