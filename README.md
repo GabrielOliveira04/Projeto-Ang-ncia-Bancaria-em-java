@@ -1,7 +1,11 @@
 # Projeto-Angencia-Bancaria-em-java
-Praticando com java orientado ao objeto, fiz um projeto de agencia bancaria para melhorar mais ainda minhas praticas com java
+## Esse projeto foi destinada a disciplina de linguagem de programação e o Projeto integrador parte 1 do projeto
+### Os seguintes alunos participaram desse projeto:
+  Gabriel de Oliveira Pontes
+  Matheus L S Maul de Andrade
+  Pablo Cristian Ferreira de Lima
 
-##Descrição do Projeto
+# Descrição do Projeto
 
 
 Este projeto é uma aplicação bancária simples escrita em Java que permite que o usuário crie contas bancárias e realize transações de depósito e saque. Ele foi desenvolvido usando a IDE Eclipse e utiliza conceitos básicos de orientação a objetos, como herança e encapsulamento.
