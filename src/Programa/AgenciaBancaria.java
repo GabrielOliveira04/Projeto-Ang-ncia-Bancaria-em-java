@@ -1,5 +1,7 @@
 package Programa;
 
+import utilitarios.Validacao;
+
 import java.util.ArrayList;
 import java.util.Scanner;
 
@@ -55,33 +57,43 @@ public class AgenciaBancaria {
 		
 		}
 	}
-	
-	
-	
-	public static void criarConta() {
-		
-		System.out.println("\nNome: ");
-		String nome = input.next();
-		
 
-		System.out.println("\nCPF: ");
-		String cpf = input.next();
-	
-		
-		System.out.println("\nEmail: ");
-		String email = input.next();
-	
-	
-		Pessoa pessoa = new Pessoa(nome, cpf, email);
-		
-		Conta conta = new Conta(pessoa);
-		
-		contasBancarias.add(conta);
-		System.out.println("Sua conta foi criada com sucesso! ");
-		
-		operacoes();
+
+
+	public static void criarConta() {
+		try {
+			System.out.println("\nNome: ");
+			String nome = input.next();
+			input.nextLine();
+			if (!Validacao.validarNome(nome)) {
+				throw new Exception("Nome inválido.");
+			}
+
+			System.out.println("\nCPF: ");
+			String cpf = input.nextLine();
+			if (!Validacao.validarCPF(cpf)) {
+				throw new Exception("CPF inválido.");
+			}
+
+			System.out.println("\nEmail: ");
+			String email = input.nextLine();
+			if (!Validacao.validarEmail(email)) {
+				throw new Exception("Email inválido.");
+			}
+
+			Pessoa pessoa = new Pessoa(nome, cpf, email);
+			Conta conta = new Conta(pessoa);
+			contasBancarias.add(conta);
+
+			System.out.println("Sua conta foi criada com sucesso!");
+			operacoes();
+		} catch (Exception e) {
+			System.out.println("Ocorreu um erro ao criar a conta: " + e.getMessage());
+			operacoes();
+		}
 	}
-	
+
+
 	public static Conta encontrarConta( int numeroConta) {
 		Conta conta = null;
 		if(contasBancarias.size() >0){
