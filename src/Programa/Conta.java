@@ -2,8 +2,7 @@ package Programa;
 
 import utilitarios.Utils;
 
-public class Conta {
-
+public abstract class Conta {
 	private static int contadorDeContas = 1;
 
 	private int numeroConta;
@@ -14,7 +13,6 @@ public class Conta {
 		this.numeroConta = contadorDeContas;
 		this.pessoa = pessoa;
 		contadorDeContas++;
-
 	}
 
 	public int getNumeroConta() {
@@ -41,54 +39,17 @@ public class Conta {
 		this.saldo = saldo;
 	}
 
+	public abstract void depositar(Double valor);
+
+	public abstract void sacar(Double valor);
+
+	public abstract void transferir(Conta contaParaDeposito, Double valor);
+
 	public String toString() {
-		return "\nNumero da conta : " + this.getNumeroConta() +
-				"\nNome: " + this.pessoa.getNome() +
-				"\nCPF : " + this.pessoa.getcpf() +
-				"\nEmail: " + this.pessoa.getEmail() +
-				"\nSaldo : " + Utils.doubleToString(this.getSaldo());
+		return "\nNumero da conta : " + this.getNumeroConta()
+				+ "\nNome: " + this.pessoa.getNome()
+				+ "\nCPF : " + this.pessoa.getcpf()
+				+ "\nEmail: " + this.pessoa.getEmail()
+				+ "\nSaldo : " + Utils.doubleToString(this.getSaldo());
 	}
-
-	
-	
-	public void depositar(Double valor) {
-		if(valor > 0) {
-			setSaldo(getSaldo() + valor);
-			System.out.println("Seu depósito foi realizado com sucesso");
-		}else {
-			System.out.println("Não foi possivel realizar o deposito! ");
-		}
-	}
-	
-	public  void sacar(double valor) {
-		if(valor > 0 && this.getSaldo() >= valor) {
-			setSaldo(getSaldo()- valor);
-			System.out.println("Seu Saque foi realizado com sucesso");
-
-		}else {
-			System.out.println("Não foi possivel realizar o Saque ! ");
-
-		}
-	}
-	
-	public void tranferir (Conta contaParaDeposito, double valor) {
-		if(valor > 0 && this.getSaldo() >= valor) {
-			setSaldo(getSaldo() - valor);
-			contaParaDeposito.saldo = contaParaDeposito.getSaldo() + valor;
-			System.out.println("Transferencia realizada com sucesso");
-		}else {
-			System.out.println("Não foi possivel realizar a transferência ");
-		}
-	}
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
 }
