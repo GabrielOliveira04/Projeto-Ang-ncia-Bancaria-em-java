@@ -1,5 +1,7 @@
 package Programa;
+import java.sql.*;
 
+import conexao.Conexao;
 import utilitarios.Validacao;
 
 import java.util.ArrayList;
@@ -55,8 +57,11 @@ public class AgenciaBancaria {
 			case 7:
 				rendimentoInvestimento();
 				break;
+			case 8:
+				consultarSaldo();
+				break;
 
-				case 8:
+			case 9:
 				System.out.println("Obrigado por usar a nossa agência");
 				System.exit(0);
 
@@ -107,10 +112,11 @@ public class AgenciaBancaria {
 					throw new Exception("Tipo de conta inválido.");
 			}
 
-			// Gerar número aleatório para a conta
+
 			int numeroConta = gerarNumeroContaAleatorio();
 			conta.setNumeroConta(numeroConta);
 
+			Conexao.criarConta(conta);
 			contasBancarias.add(conta);
 
 			System.out.println("Sua conta foi criada com sucesso!");
@@ -122,14 +128,14 @@ public class AgenciaBancaria {
 	}
 
 	public static int gerarNumeroContaAleatorio() {
-		// Gerar um número de conta aleatório
+
 		int numeroConta;
 		boolean numeroExistente;
 
 		do {
-			numeroConta = (int) (Math.random() * 10000); // Gera um número aleatório de 0 a 9999
+			numeroConta = (int) (Math.random() * 10000);
 
-			// Verificar se o número já existe nas contas cadastradas
+
 			int finalNumeroConta = numeroConta;
 			numeroExistente = contasBancarias.stream().anyMatch(conta -> conta.getNumeroConta() == finalNumeroConta);
 		} while (numeroExistente);
@@ -150,16 +156,21 @@ public class AgenciaBancaria {
 		System.out.println("Número da conta: ");
 		int numeroConta = input.nextInt();
 
-		Conta conta = encontrarConta(numeroConta);
+		try {
+			double saldoAtual = Conexao.consultarSaldo(numeroConta);
+			System.out.println("Saldo atual: " + saldoAtual);
 
-		if (conta != null) {
-			System.out.println("Qual o valor deseja depositar? ");
-			Double valorDeposito = input.nextDouble();
-			conta.depositar(valorDeposito);
-			System.out.println("Valor depositado com sucesso ");
-		} else {
-			System.out.println("A conta não foi encontrada! ");
+			System.out.println("Qual valor deseja depositar? ");
+			double valorDeposito = input.nextDouble();
+
+			double novoSaldo = saldoAtual + valorDeposito;
+
+			Conexao.atualizarSaldo(numeroConta, novoSaldo);
+			System.out.println("Depósito realizado com sucesso. Novo saldo: " + novoSaldo);
+		} catch (SQLException e) {
+			System.out.println("Ocorreu um erro: " + e.getMessage());
 		}
+
 		operacoes();
 	}
 
@@ -167,34 +178,27 @@ public class AgenciaBancaria {
 		System.out.println("Número da conta: ");
 		int numeroConta = input.nextInt();
 
-		Conta conta = encontrarConta(numeroConta);
-		if (conta != null) {
+		try {
+			double saldoAtual = Conexao.consultarSaldo(numeroConta);
+			System.out.println("Saldo atual: " + saldoAtual);
+
 			System.out.println("Qual valor deseja sacar? ");
-			Double valorSaque = input.nextDouble();
+			double valorSaque = input.nextDouble();
 
-			// Verificar o tipo de conta e aplicar desconto de tarifa (se necessário)
-			if (conta instanceof ContaCorrente || conta instanceof ContaPoupanca || conta instanceof ContaInvestimento) {
-				System.out.println("De qual conta deseja sacar? (1 - Conta Corrente, 2 - Conta Poupança, 3 - Conta Investimento)");
-				int tipoSaque = input.nextInt();
-
-				if (tipoSaque == 1 && conta instanceof ContaCorrente) {
-					((ContaCorrente) conta).sacar(valorSaque); // Realizar o saque na conta corrente
-				} else if (tipoSaque == 2 && conta instanceof ContaPoupanca) {
-					((ContaPoupanca) conta).sacar(valorSaque); // Realizar o saque na conta poupança
-				}else if (tipoSaque == 3 && conta instanceof ContaInvestimento) {
-						((ContaInvestimento) conta).sacar(valorSaque);
-				} else {
-					System.out.println("Tipo de conta inválido para saque.");
-				}
+			if (valorSaque > saldoAtual) {
+				System.out.println("Saldo insuficiente");
 			} else {
-				conta.sacar(valorSaque); // Realizar o saque normalmente para outros tipos de conta
+				double novoSaldo = saldoAtual - valorSaque;
+
+				Conexao.atualizarSaldo(numeroConta, novoSaldo);
+				System.out.println("Saque realizado com sucesso. Novo saldo: " + novoSaldo);
 			}
-		} else {
-			System.out.println("A conta não foi encontrada! ");
+		} catch (SQLException e) {
+			System.out.println("Ocorreu um erro: " + e.getMessage());
 		}
+
 		operacoes();
 	}
-
 
 	public static void transferir() {
 		System.out.println("Número da conta do remetente: ");
@@ -245,15 +249,45 @@ public class AgenciaBancaria {
 		}
 		operacoes();
 	}
+	public static void consultarSaldo() {
+		System.out.println("Número da conta: ");
+		int numeroConta = input.nextInt();
+
+		try {
+			double saldo = Conexao.consultarSaldo(numeroConta);
+			System.out.println("Saldo: " + saldo);
+		} catch (SQLException e) {
+			System.out.println("Ocorreu um erro: " + e.getMessage());
+		}
+
+		operacoes();
+	}
+
 
 	public static void listarContas() {
-		if (contasBancarias.size() > 0) {
-			for (Conta conta : contasBancarias) {
-				System.out.println(conta);
+		try {
+			String sql = "SELECT numeroConta, saldo FROM Contas";
+			Connection connection = Conexao.obterConexao();
+			Statement statement = connection.createStatement();
+			ResultSet resultSet = statement.executeQuery(sql);
+
+			if (resultSet.next()) {
+				do {
+					int numeroConta = resultSet.getInt("numeroConta");
+					double saldo = resultSet.getDouble("saldo");
+					System.out.println("Número da conta: " + numeroConta + ", Saldo: " + saldo);
+				} while (resultSet.next());
+			} else {
+				System.out.println("Não há contas cadastradas! ");
 			}
-		} else {
-			System.out.println("Não há contas cadastradas! ");
+
+			resultSet.close();
+			statement.close();
+			Conexao.fecharConexao(connection);
+		} catch (SQLException e) {
+			System.out.println("Ocorreu um erro: " + e.getMessage());
 		}
+
 		operacoes();
 	}
 }
