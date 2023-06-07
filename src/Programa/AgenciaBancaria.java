@@ -1,7 +1,5 @@
 package Programa;
-import java.sql.*;
 
-import conexao.Conexao;
 import utilitarios.Validacao;
 
 import java.util.ArrayList;
@@ -30,7 +28,8 @@ public class AgenciaBancaria {
 		System.out.println("|      Opção 5 - Listar           					  |");
 		System.out.println("|      Opção 6 - Rendimento Poupança             	  |");
 		System.out.println("|      Opção 7 - Rendimento Investimento              |");
-		System.out.println("|      Opção 8 - Sair             					  |");
+		System.out.println("|      Opção 8 - Consultar Saldo             		  |");
+		System.out.println("|      Opção 9 - Sair             					  |");
 
 		int operacao = input.nextInt();
 		switch (operacao) {
@@ -116,7 +115,7 @@ public class AgenciaBancaria {
 			int numeroConta = gerarNumeroContaAleatorio();
 			conta.setNumeroConta(numeroConta);
 
-			Conexao.criarConta(conta);
+
 			contasBancarias.add(conta);
 
 			System.out.println("Sua conta foi criada com sucesso!");
@@ -157,17 +156,20 @@ public class AgenciaBancaria {
 		int numeroConta = input.nextInt();
 
 		try {
-			double saldoAtual = Conexao.consultarSaldo(numeroConta);
-			System.out.println("Saldo atual: " + saldoAtual);
+			Conta conta = encontrarConta(numeroConta);
+			if (conta != null) {
+				System.out.println("Saldo atual: " + conta.getSaldo());
 
-			System.out.println("Qual valor deseja depositar? ");
-			double valorDeposito = input.nextDouble();
+				System.out.println("Qual valor deseja depositar? ");
+				double valorDeposito = input.nextDouble();
 
-			double novoSaldo = saldoAtual + valorDeposito;
+				conta.depositar(valorDeposito);
 
-			Conexao.atualizarSaldo(numeroConta, novoSaldo);
-			System.out.println("Depósito realizado com sucesso. Novo saldo: " + novoSaldo);
-		} catch (SQLException e) {
+				System.out.println("Depósito realizado com sucesso. Novo saldo: " + conta.getSaldo());
+			} else {
+				System.out.println("Conta não encontrada.");
+			}
+		} catch (Exception e) {
 			System.out.println("Ocorreu um erro: " + e.getMessage());
 		}
 
@@ -179,21 +181,20 @@ public class AgenciaBancaria {
 		int numeroConta = input.nextInt();
 
 		try {
-			double saldoAtual = Conexao.consultarSaldo(numeroConta);
-			System.out.println("Saldo atual: " + saldoAtual);
+			Conta conta = encontrarConta(numeroConta);
+			if (conta != null) {
+				System.out.println("Saldo atual: " + conta.getSaldo());
 
-			System.out.println("Qual valor deseja sacar? ");
-			double valorSaque = input.nextDouble();
+				System.out.println("Qual valor deseja sacar? ");
+				double valorSaque = input.nextDouble();
 
-			if (valorSaque > saldoAtual) {
-				System.out.println("Saldo insuficiente");
+				conta.sacar(valorSaque);
+
+				System.out.println("Saque realizado com sucesso. Novo saldo: " + conta.getSaldo());
 			} else {
-				double novoSaldo = saldoAtual - valorSaque;
-
-				Conexao.atualizarSaldo(numeroConta, novoSaldo);
-				System.out.println("Saque realizado com sucesso. Novo saldo: " + novoSaldo);
+				System.out.println("Conta não encontrada.");
 			}
-		} catch (SQLException e) {
+		} catch (Exception e) {
 			System.out.println("Ocorreu um erro: " + e.getMessage());
 		}
 
@@ -224,6 +225,7 @@ public class AgenciaBancaria {
 		}
 		operacoes();
 	}
+
 	public static void rendimentoPoupanca() {
 		System.out.println("Número da conta poupança: ");
 		int numeroConta = input.nextInt();
@@ -249,45 +251,41 @@ public class AgenciaBancaria {
 		}
 		operacoes();
 	}
+
 	public static void consultarSaldo() {
 		System.out.println("Número da conta: ");
 		int numeroConta = input.nextInt();
 
-		try {
-			double saldo = Conexao.consultarSaldo(numeroConta);
-			System.out.println("Saldo: " + saldo);
-		} catch (SQLException e) {
-			System.out.println("Ocorreu um erro: " + e.getMessage());
+		Conta conta = encontrarConta(numeroConta);
+		if (conta != null) {
+			System.out.println("Saldo: " + conta.getSaldo());
+		} else {
+			System.out.println("Conta não encontrada.");
 		}
 
 		operacoes();
 	}
-
 
 	public static void listarContas() {
 		try {
-			String sql = "SELECT numeroConta, saldo FROM Contas";
-			Connection connection = Conexao.obterConexao();
-			Statement statement = connection.createStatement();
-			ResultSet resultSet = statement.executeQuery(sql);
-
-			if (resultSet.next()) {
-				do {
-					int numeroConta = resultSet.getInt("numeroConta");
-					double saldo = resultSet.getDouble("saldo");
-					System.out.println("Número da conta: " + numeroConta + ", Saldo: " + saldo);
-				} while (resultSet.next());
+			if (contasBancarias.isEmpty()) {
+				System.out.println("Não há contas cadastradas!");
 			} else {
-				System.out.println("Não há contas cadastradas! ");
+				System.out.println("Contas cadastradas:");
+				for (Conta conta : contasBancarias) {
+					System.out.println("Número da conta: " + conta.getNumeroConta());
+					System.out.println("Nome do Titular: " + conta.getPessoa().getNome());
+					System.out.println("Saldo: " + conta.getSaldo());
+					System.out.println("E-mail: " + conta.getPessoa().getEmail());
+					System.out.println("------------------------");
+				}
 			}
-
-			resultSet.close();
-			statement.close();
-			Conexao.fecharConexao(connection);
-		} catch (SQLException e) {
-			System.out.println("Ocorreu um erro: " + e.getMessage());
+		} catch (Exception e) {
+			System.out.println("Ocorreu um erro ao listar as contas: " + e.getMessage());
 		}
-
 		operacoes();
 	}
+
 }
+
+
